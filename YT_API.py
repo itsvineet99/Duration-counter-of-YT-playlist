@@ -1,29 +1,29 @@
 from googleapiclient.discovery import build
 import re
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
 
-api_key = "AIzaSyA7s5GfVuWrbTCWaqOAzTKoGOrpQ96yacY"
+
+
+load_dotenv()
+api_key = os.getenv("api_key")
 
 youtube = build("youtube", "v3",developerKey=api_key)
-
-request = youtube.channels().list(
-    part="statistics",
-    forUsername="sentdex"
-)
-
-response = request.execute()
-channel_id = response["items"][0]["id"]
-
 
 hour_pattern = re.compile(r"(\d+)H")
 minute_pattern = re.compile(r"(\d+)M")
 second_pattern = re.compile(r"(\d+)S")
 
+playlist_id = input("Enter the id of playlist: ")
+
+total_seconds = 0
+
 nextPageToken = None
 while True:
     pl_request = youtube.playlistItems().list(
         part="contentDetails",
-        playlistId="PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU",
+        playlistId=playlist_id,
         maxResults=50,
         pageToken=nextPageToken
     )
@@ -58,12 +58,17 @@ while True:
             seconds = seconds
         ).total_seconds()
 
-        print(video_seconds)
-        print()
+        total_seconds += video_seconds
     nextPageToken = pl_response.get("nextPageToken")
     if not nextPageToken:
         break
 
+total_seconds = int(total_seconds)
+
+minutes, seconds = divmod(total_seconds, 60)
+hours, minutes = divmod(minutes, 60)
+
+print(f"{hours}H:{minutes}M:{seconds}S")
 
 
 
