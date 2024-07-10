@@ -10,31 +10,35 @@ api_key = os.getenv("api_key")
 
 youtube = build("youtube", "v3", developerKey=api_key)
 
-user_name = input("Enter username of channel: ") 
-request_channel = youtube.channels().list(
-    part="statistics",
-    forUsername=user_name
-)
+try:
+    user_name = input("Enter username of channel: ") 
+    request_channel = youtube.channels().list(
+        part="statistics",
+        forUsername=user_name
+    )
 
-response_channel = request_channel.execute()
-channel_id = response_channel["items"][0]["id"] 
-
-
-request_playlist = youtube.playlists().list(
-    part="snippet, contentDetails",
-    channelId=channel_id,
-    maxResults=50
-)
-
-response_playlist = request_playlist.execute()
-
-title = input("Enter the title of playlist: ")
-for playlist in response_playlist['items']:
-        if playlist['snippet']['title'] == title:   
-            print(f"Title: {playlist['snippet']['title']}")
+    response_channel = request_channel.execute()
+    channel_id = response_channel["items"][0]["id"] 
 
 
-playlist_id = playlist["id"]
+    request_playlist = youtube.playlists().list(
+        part="snippet, contentDetails",
+        channelId=channel_id,
+        maxResults=50
+    )
+
+    response_playlist = request_playlist.execute()
+
+    title = input("Enter the title of playlist: ")
+    for playlist in response_playlist['items']:
+            if playlist['snippet']['title'] == title:   
+                print(f"Title: {playlist['snippet']['title']}")
+
+
+    playlist_id = playlist["id"]
+
+except KeyError:
+     playlist_id = input("username provided by you is wrong. if you don't have correct username enter playlist id: ")
 
 
 hour_pattern = re.compile(r"(\d+)H")
